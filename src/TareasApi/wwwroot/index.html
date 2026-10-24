@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tareas NoSQL</title>
+    <style>
+        body { font-family: Segoe UI, Arial, sans-serif; background: #f2f5f9; margin: 0; color: #1d2733; }
+        main { max-width: 640px; margin: 40px auto; padding: 0 16px; }
+        h1 { margin-bottom: 4px; }
+        p.sub { margin-top: 0; color: #5b6b7b; }
+        form { display: flex; gap: 8px; margin: 20px 0; }
+        input[type=text] { flex: 1; padding: 10px 12px; border: 1px solid #c3ccd6; border-radius: 6px; font-size: 16px; }
+        button { padding: 10px 16px; border: 0; border-radius: 6px; background: #0b6bcb; color: #fff; font-size: 15px; cursor: pointer; }
+        button.del { background: #c0392b; padding: 6px 10px; font-size: 13px; }
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid #dde3ea; border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+        li span { flex: 1; }
+        li.hecha span { text-decoration: line-through; color: #8a97a5; }
+        footer { margin-top: 24px; font-size: 13px; color: #5b6b7b; }
+    </style>
+</head>
+<body>
+    <main>
+        <h1>Tareas NoSQL</h1>
+        <p class="sub">Aplicacion de tareas con Azure Cosmos DB</p>
+        <form id="f">
+            <input type="text" id="t" placeholder="Nueva tarea" autocomplete="off">
+            <button type="submit">Agregar</button>
+        </form>
+        <ul id="l"></ul>
+        <footer id="pie"></footer>
+    </main>
+    <script>
+        const l = document.getElementById("l");
+        const t = document.getElementById("t");
+        const pie = document.getElementById("pie");
+
+        async function cargar() {
+            const r = await fetch("/api/tareas");
+            const d = await r.json();
+            l.innerHTML = "";
+            d.forEach(x => {
+                const li = document.createElement("li");
+                if (x.hecha) li.className = "hecha";
+                const c = document.createElement("input");
+                c.type = "checkbox";
+                c.checked = x.hecha;
+                c.onchange = async () => {
+                    await fetch("/api/tareas/" + x.id, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ titulo: x.titulo, hecha: c.checked }) });
+                    cargar();
+                };
+                const s = document.createElement("span");
+                s.textContent = x.titulo;
+                const b = document.createElement("button");
+                b.className = "del";
+                b.textContent = "Eliminar";
+                b.onclick = async () => {
+                    await fetch("/api/tareas/" + x.id, { method: "DELETE" });
+                    cargar();
+                };
+                li.append(c, s, b);
+                l.append(li);
+            });
+            const h = await (await fetch("/health")).json();
+            pie.textContent = "Base de datos: " + h.base_datos + " | Tareas guardadas: " + h.tareas;
+        }
+
+        document.getElementById("f").onsubmit = async e => {
+            e.preventDefault();
+            if (!t.value.trim()) return;
+            await fetch("/api/tareas", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ titulo: t.value }) });
+            t.value = "";
+            cargar();
+        };
+
+        cargar();
+    </script>
+</body>
+</html>
