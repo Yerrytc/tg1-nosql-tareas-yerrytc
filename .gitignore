@@ -1,0 +1,9 @@
+bin/
+obj/
+publicar/
+.vs/
+.terraform/
+*.tfstate
+*.tfstate.*
+*.user
+appsettings.Development.json
