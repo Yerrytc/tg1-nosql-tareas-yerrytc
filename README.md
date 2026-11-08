@@ -15,6 +15,7 @@ La aplicacion no usa Redis, MongoDB, Neo4j ni Prometheus, como indica el enuncia
 
 - Aplicacion publicada: https://app-tg1-nosql-yerrytc.azurewebsites.net
 - Repositorio: https://github.com/Yerrytc/tg1-nosql-tareas-yerrytc
+- Video en YouTube: https://youtu.be/7J8stjhJkiA
 
 ## Cumplimiento del enunciado
 
